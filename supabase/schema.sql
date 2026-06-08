@@ -75,22 +75,48 @@ after insert or delete on public.question_votes
 for each row execute function public.handle_question_vote();
 
 -- 7. Enable Supabase Realtime Replication for tables
--- Clean up existing realtime additions to avoid duplicates
-begin;
-  -- Remove tables from realtime if they were added before
-  alter publication supabase_realtime drop table if exists public.questions;
-  alter publication supabase_realtime drop table if exists public.question_votes;
-  alter publication supabase_realtime drop table if exists public.polls;
-  alter publication supabase_realtime drop table if exists public.poll_options;
-  alter publication supabase_realtime drop table if exists public.poll_votes;
-  
-  -- Add tables to realtime publication
-  alter publication supabase_realtime add table public.questions;
-  alter publication supabase_realtime add table public.question_votes;
-  alter publication supabase_realtime add table public.polls;
-  alter publication supabase_realtime add table public.poll_options;
-  alter publication supabase_realtime add table public.poll_votes;
-commit;
+do $$
+begin
+  -- Add questions table
+  if not exists (
+    select 1 from pg_publication_tables 
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'questions'
+  ) then
+    alter publication supabase_realtime add table public.questions;
+  end if;
+
+  -- Add question_votes table
+  if not exists (
+    select 1 from pg_publication_tables 
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'question_votes'
+  ) then
+    alter publication supabase_realtime add table public.question_votes;
+  end if;
+
+  -- Add polls table
+  if not exists (
+    select 1 from pg_publication_tables 
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'polls'
+  ) then
+    alter publication supabase_realtime add table public.polls;
+  end if;
+
+  -- Add poll_options table
+  if not exists (
+    select 1 from pg_publication_tables 
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'poll_options'
+  ) then
+    alter publication supabase_realtime add table public.poll_options;
+  end if;
+
+  -- Add poll_votes table
+  if not exists (
+    select 1 from pg_publication_tables 
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'poll_votes'
+  ) then
+    alter publication supabase_realtime add table public.poll_votes;
+  end if;
+end $$;
 
 -- ==========================================
 -- Seed Data for Live Q&A and Polls
