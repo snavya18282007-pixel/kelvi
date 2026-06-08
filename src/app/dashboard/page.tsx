@@ -211,7 +211,10 @@ export default function QADashboard() {
       setNewQuestionText('');
     } catch (err) {
       console.error(err);
-      setModError(err instanceof Error ? err.message : 'Error creating question.');
+      const errMsg = err && typeof err === 'object' && 'message' in err
+        ? String(err.message)
+        : 'Error creating question.';
+      setModError(errMsg);
     } finally {
       setSubmitting(false);
     }

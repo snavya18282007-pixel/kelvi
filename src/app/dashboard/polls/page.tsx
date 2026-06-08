@@ -256,7 +256,10 @@ export default function PollsPage() {
       setShowCreateForm(false);
     } catch (err) {
       console.error(err);
-      setFormError(err instanceof Error ? err.message : 'Failed to create poll.');
+      const errMsg = err && typeof err === 'object' && 'message' in err
+        ? String(err.message)
+        : 'Failed to create poll.';
+      setFormError(errMsg);
     } finally {
       setSubmitting(false);
     }
